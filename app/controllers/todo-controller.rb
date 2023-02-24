@@ -1,4 +1,11 @@
 class TodoController < Sinatra::Base
+
+    set :views, './app/views'
+
+    # before do
+    #     puts "hello, to this route"
+    # end
+
     get'/' do
         "Welcome to TodoController"
     end
@@ -45,8 +52,41 @@ class TodoController < Sinatra::Base
         [200, todos.to_json]
 
     end
+    get '/view/todos' do
+        @todos = Todo.all
+        erb :todos
+    end
 
     put '/todos/update/:id' do
+
+        begin
         # using the hash
+
+            data = JSON.parse(request.body.read)
+            todo_id = params['id'].to_i
+            todo = Todo.find(todo_id)
+            todo.update(data)
+            {message: "TODO UPDATED"}.to_json
+
+        rescue => e
+
+            [422, {error: e.message}.to_json]
+
+        end
     end
+    delete '/todos/destroy/:id' do
+            begin
+                todo_id = params['id'].to_i
+                todo = Todo.find(todo_id)
+                todo.destroy
+                {message: "Successfully deleted"}.to_json
+
+            rescue => e
+
+                    [422, {error: e.message}.to_json]
+
+            end
+    end
+        
+    
 end
